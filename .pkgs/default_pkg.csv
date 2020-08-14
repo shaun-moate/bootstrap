@@ -1,0 +1,14 @@
+tag,name,purpose
+,vim,text editor
+,xorg-server,graphical server
+,xorg-xwininfo,querying of information about windows
+,xorg-init,starts graphical server
+,xorg-xinit,starts graphical server
+,libxft,-
+,libx11,-
+,libxinerama,-
+,xcompmgr,for transerancy
+,xorg-xprop,tool for detecting window properties
+,xwallpaper,sets wallpapers
+,xclip,allows copy and paste from the command line
+,ttf-linux-libertine,provides Sans and Serif fonts

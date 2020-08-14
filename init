@@ -1,0 +1,114 @@
+#!/bin/sh
+
+###--- FUNCTIONS ---###
+
+install_package() { pacman --noconfirm --needed -S "$1" >/dev/null 2>&1; }
+
+error() { printf "EXIT STATUS:\\n%s\\n" "$1"; exit; }
+
+refresh_keys() { \
+	echo "Refreshing Arch keyrings... "
+	pacman --noconfirm --needed -Sy archlinux-keyring >/dev/null 2>&1; 
+}
+
+temp_permissions() { \
+	echo "Creating temporary permissions in /etc/sudoers..."
+	sed -i "/#bootstrap-temp/d" /etc/sudoers
+	echo "%wheel ALL=(ALL) NOPASSWD: ALL #bootstrap-temp" >> /etc/sudoers
+}
+
+core_packages() { \
+	echo "Installing core packages and synching times..."
+	echo "   Installing curl..."
+	pacman --noconfirm --needed -S curl >/dev/null 2>&1; 
+	echo "   Installing base-devel..."
+	pacman --noconfirm --needed -S base-devel >/dev/null 2>&1; 
+	echo "   Installing git..."
+	pacman --noconfirm --needed -S git >/dev/null 2>&1; 
+	echo "   Installing ntp..."
+	pacman --noconfirm --needed -S ntp >/dev/null 2>&1;
+
+	echo "   Synching clocks with ntpdate..."
+	ntpdate 0.uk.pool.ntp.org >/dev/null 2>&1	
+}
+
+welcome() { \
+	read -p "---- WELCOME! ---- `echo $'\n   '`Welcome to Arch (Artix) Bootstrap script. `echo $'\n   '`Are you ready to dive in (Y/n): " check
+	echo "------------------"
+
+	if [ "$check" != "Y" ]; then
+		exit;
+	fi
+}
+
+user_check() { \
+	read -p "Please enter a username: " name
+
+	if [ `id -u "$name"`>/dev/bull 2>&1 ]; then
+		read -p "---- WARNING! ---- `echo $'\n   '`By proceeding you will overwrite the HOME directory of the $name (inc. all data and .dotfiles) `echo $'\n   '`Are you sure you want to proceed (Y/n): " check
+	echo "------------------"
+	else
+		check="Y"	
+	fi
+
+	if [ "$check" != "Y" ]; then
+		exit;
+	fi
+}
+
+create_user() { \
+	read -sp "Please enter a password: " pass1
+	echo
+	read -sp "Please re-enter password: " pass2
+
+	while ! [ "$pass1" = "$pass2" ]; do
+		unset pass2
+		echo
+		echo "-- Error: Passwords don't match ---"
+		read -sp "Please enter a password: " pass1
+		echo
+		read -sp "Please re-enter password: " pass2
+	done ;
+	
+	echo
+	echo "------------------"	
+	echo "Adding user $name..."
+	useradd -m -g wheel -s /bin/bash "$name" >/dev/null 2>&1 ||
+	usermod -a -G wheel "$name" && mkdir -p /home/"$name" >/dev/null 2>&1 && chown "$name":wheel /home/"$name"
+
+	echo "$name:$pass1" | chpasswd
+
+	unset pass1 pass2 ;
+	echo "Successfully created user $name..."
+	echo "------------------"	
+}
+
+final_check() { \
+	read -p "---- LAST CHANCE TO EXIT! ---- `echo $'\n   '`Last chance to exit before package installs, .dotfile creation, and initialisation. `echo $'\n   '`Are you sure you want to proceed (Y/n): " check
+	echo "------------------"
+
+	if [ "$check" != "Y" ]; then
+		exit;
+	fi
+}
+
+install_loop() { \
+	sed '/^tag/d' .pkgs/default_pkg.csv | cut -d ',' -f2 > /tmp/pkgs
+	
+	while x=, read -r pkg; do
+		install_package $pkg 
+	done < /tmp/pkgs
+}
+
+###--- INIT ---###
+install_package dialog || error "Are you sure you have access to the internet and are running as ROOT?"
+welcome || error "Exited bootstrap @ 00 welcome"
+user_check || error "Exited bootstrap @ 01 user_check"
+create_user || error "Exited bootstrap @ 02 create_user"
+final_check || error "Exited bootstrap @ 03 final_check"
+refresh_keys || error "Exited bootstrap @ 04 refresh_keys"
+core_packages || error "Exited bootstrap @ 05 core_packages"
+temp_permissions || error "Exited bootstrap @ 06 temp_permissions"
+install_loop || error "Exited bootstrap @ 07 install_loop"
+
+echo "Bootstrap is now COMPLETE!"

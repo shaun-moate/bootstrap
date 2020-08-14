@@ -1,0 +1,5 @@
+ - generate files of packages to install with tags based on how to install them
+ - create the installation loop for all the packages
+ - generate all the dot-files
+ - split init and ask whether user wants default installation or personalised (based on shaun-moate .dotfiles and suckless builds)
+ - refactor to create a cli interface to for future install (based on python36)
