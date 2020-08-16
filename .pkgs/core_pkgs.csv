@@ -9,6 +9,7 @@ tag,name,purpose
 ,libxinerama,-
 ,xcompmgr,for transerancy
 ,xorg-xprop,tool for detecting window properties
+,openshh,ssh service
 ,xwallpaper,sets wallpapers
 ,xclip,allows copy and paste from the command line
 ,ttf-linux-libertine,provides Sans and Serif fonts

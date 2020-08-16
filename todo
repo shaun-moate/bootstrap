@@ -1,5 +1,7 @@
  - generate files of packages to install with tags based on how to install them
- - create the installation loop for all the packages
- - generate all the dot-files
- - split init and ask whether user wants default installation or personalised (based on shaun-moate .dotfiles and suckless builds)
- - refactor to create a cli interface to for future install (based on python36)
+ - build git install capabilities for brave-bin, st, dwm and dmenu
+ - generate all the dot-files (vim, xinit, bash, bash_profile)
+ - review and set key bindings (ie. alt+p for dmenu)
+ - create symlink generator to put configs in correct location in the $HOME directory
+
+ - list out all key driver installs for Mac and add logic to bootstrap: wifi - broadcom-wl, xorg/video - x86-video-intel, mesa.
